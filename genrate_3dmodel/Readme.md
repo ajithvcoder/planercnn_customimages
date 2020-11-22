@@ -1,0 +1,1 @@
+Files in folder generate_3dmodel/ has code snippets for generating ply model from segmentations,depth and color images which i got from internet
