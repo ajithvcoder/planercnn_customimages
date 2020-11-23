@@ -32,7 +32,7 @@ from options import parse_args
 from config import InferenceConfig
 
 
-from write_ply_planenet import predict3D
+#from write_ply_planenet import predict3D
 import pyvista as pv 
 from pyvista import examples
 
@@ -624,11 +624,11 @@ def evaluate(options):
      0.00e+00, 1.82e+03, 1.22e+03, 0.00e+00, 0.00e+00, 0.00e+00, \
      1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 3.26e+03, 2.45e+03,\
       1.00e+03,5.00e+00])
-    image = cv2.imread("test/inference/0_segmentation_0_final.png") #x,x,3
-    depth = cv2.imread("test/inference/0_depth_0_final_ori.png",0) #x,x
-    segmentation = cv2.imread("test/inference/0_segmentation_0_final.png",0) #change it
-    depth_final = cv2.imread("test/inference/0_depth_0_final_ori.png") #x,x
-    planes =  np.load("test/inference/0_plane_parameters_0.npy") #change if its not working
+    image = cv2.imread("test/inference_debug/0_segmentation_0_final.png") #x,x,3
+    depth = cv2.imread("test/inference_debug/0_depth_0_final_ori.png",0) #x,x
+    segmentation = cv2.imread("test/inference_debug/0_segmentation_0_final.png",0) #change it
+    depth_final = cv2.imread("test/inference_debug/0_depth_0_final_ori.png") #x,x
+    planes =  np.load("test/inference_debug/0_plane_parameters_0.npy") #change if its not working
     original = cv2.imread("demostore/phsample.png")
     print(original.shape)
     print(depth_final.shape)
@@ -636,7 +636,7 @@ def evaluate(options):
     image_c = np.concatenate((original,depth_final,image),axis=1)
     cv2.imwrite("output.png",image_c)
 
-    folder = "genrate_3dmodel/predict3dfol"
+    # folder = "genrate_3dmodel/predict3dfol"
     index = 0
     image_c_written = cv2.imread("output.png")
     cv2.imshow("output",image_c_written)
@@ -646,9 +646,9 @@ def evaluate(options):
     cv2.destroyAllWindows()
 
     print("segmentation time through model done in %s seconds "% (time.time() - start_time_1))
-    predict3D(folder, index, image, depth, segmentation, planes, info)
-    print("3d model time through model done in %s seconds "% (time.time() - start_time_1))
-    filename = 'genrate_3dmodel/predict3dfol/0_model.ply'
+    #predict3D(folder, index, image, depth, segmentation, planes, info)
+    #print("3d model time through model done in %s seconds "% (time.time() - start_time_1))
+    filename = 'test/inference_debug/0_model_0_final.ply'
 
 
     print(filename)
@@ -681,20 +681,23 @@ if __name__ == '__main__':
         args.printInfo = True
         pass
     args.customDataFolder="demostore"
+    
     # camera = cv2.VideoCapture(0)
     # i = 0
     # while i<1:
     #     input("Press Enter to capture")
     #     start_time_1 = time.time()
     #     return_value, image = camera.read()
-    #     image = cv2.resize(image,(640,480))
-    #     cv2.imwrite(args.customDataFolder+"/"+"sample.png",image)
+    #     if return_value:
+    #         image = cv2.resize(image,(640,480))
+    #         #cv2.imwrite(args.customDataFolder+"/"+"sample.png",image)
+    #         cv2.imwrite("demostore/phsample.png",image)
     #     i += 1
     # del(camera)
 
-    url = 'http://192.168.43.25:8080/video'
+    url = 'http://192.168.225.179:8080/video'
     input("Press Enter to capture")
-    time.sleep(10)
+    time.sleep(15)
     camera = cv2.VideoCapture(url)
 
     i = 0
@@ -706,6 +709,8 @@ if __name__ == '__main__':
             image = cv2.resize(image,(640,480))
             cv2.imwrite("demostore/phsample.png",image)
             i += 1
+
+
     # del(camera)
     # cv2.imshow('frame',image)
     # q = cv2.waitKey(1)

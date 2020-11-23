@@ -1,29 +1,14 @@
 [![License CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)
 ![Python 3.7](https://img.shields.io/badge/python-3.7-green.svg)
-# PlaneRCNN: 3D Plane Detection and Reconstruction from a Single Image 
-![alt text](https://research.nvidia.com/sites/default/files/publications/planercnn.jpg)
 
-By Chen Liu, Kihwan Kim, Jinwei Gu, Yasutaka Furukawa, and Jan Kautz
+# PlaneRCNN: 3D Plane Detection and Reconstruction from a Single Image - Extended
 
-This paper will be presented (Oral) in IEEE CVPR 2019.
 
 ## Introduction
 
-This paper proposes a deep neural architecture, PlaneR-CNN, that detects arbitrary number of planes, and reconstructs piecewise planar surfaces from a single RGB image. 
-For more details, please refer to our [paper](https://arxiv.org/pdf/1812.04072.pdf) and [video](https://www.youtube.com/watch?v=d9XfMvVXGwM), or visit [project website](https://research.nvidia.com/publication/2019-06_PlaneRCNN). 
-The code is implemented using PyTorch.
+This paper proposes a deep neural architecture, PlaneR-CNN, that detects arbitrary number of planes, and reconstructs piecewise planar surfaces from a single RGB image. The code is implemented using PyTorch.
 
-### Project members ###
 
-* [Chen Liu](http://art-programmer.github.io), Washington University in St. Louis
-* [Kihwan Kim](https://research.nvidia.com/person/kihwan-kim), NVIDIA
-* [Jinwei Gu](http://www.gujinwei.org/), SenseTime
-* [Yasutaka Furukawa](http://www.cs.sfu.ca/~furukawa/), Simon Fraser University
-* [Jan Kautz](https://research.nvidia.com/person/jan-kautz), NVIDIA
-
-### License ###
-Copyright (c) 2018 NVIDIA Corp.  All Rights Reserved.
-This work is licensed under the [Creative Commons Attribution NonCommercial ShareAlike 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 
 ## Getting Started 
 Clone repository: 
@@ -54,8 +39,12 @@ Now, we compile nms and roialign as explained in the installation section of [py
  | GTX 960M                | sm_50 |
  | GTX 1070                | sm_61 |
  | GTX 1080 (Ti), Titan XP | sm_61 |
+ | P100                    | sm_60 | 
+
+ For gene code you can refer this [link](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
 
 More details of the compute capability are shown in [NVIDIA](https://developer.nvidia.com/cuda-gpus)
+
 
 ```bash
 cd nms/src/cuda/
@@ -72,28 +61,38 @@ python build.py
 cd ../../
 
 ```
+
+Note: If you are doing in colab then go with cuda8.0 , torch 0.4.0 , gcc 5+ for building and upgrade to torch 0.4.1 for evaluate/training.
+
+
 Please note that, the Mask R-CNN backbone does not support cuda10.0 and gcc versions higher than 7. If you have troubles compiling these two libraries, try to downgrade PyTorch to 0.4.0 before compilation and upgrade back to 0.4.1 after compilation. You might also want to find more information on their original [repository](https://github.com/multimodallearning/pytorch-mask-rcnn).
 
-## Models
+## Models - verified
 Models are saved under *checkpoint/*. You can download our trained model from [here](https://www.dropbox.com/s/yjcg6s57n581sk0/checkpoint.zip?dl=0), and put it under *checkpoint/* if you want to fine-tune it or run inferences.
+
+Backup gdrive link - [here](https://drive.google.com/file/d/1o2wZG0swF-HImZbQGPC7cHONkCThFVQZ/view?usp=sharing)
 
 ## Plane representation
 In this project, plane parameters are of absolute scale (in terms of meters). Each plane has three parameters, which equal to plane_normal * plane_offset. Suppose plane_normal is (a, b, c) and plane_offset is d, every point (X, Y, Z) on the plane satisfies, aX + bY + cZ = d. Then plane parameters are (a, b, c)*d. Since plane normal is a unit vector, we can extract plane_normal and plane_offset from their multiplication.
  
-## Run the inference code with an example
+## Run the inference code with an example - verified
 ```bash
-python evaluate.py --methods=f --suffix=warping_refine --dataset=inference --customDataFolder=example_images
+python evaluate_original.py --methods=f --suffix=warping_refine --dataset=inference --customDataFolder=example_images
 ```
 
 Results are saved under "test/inference/". Besides visualizations, plane parameters (#planes x 3) are saved in "\*_plane_parameters_0.npy" and plane masks (#planes x 480 x 640) are saved in "\*_plane_masks_0.npy".
 
-## Run the inference code with custom data
+## Run the inference code with custom data - verified
 Please put your images (*.png* or *.jpg* files), and camera intrinsics under a folder ($YOUR_IMAGE_FOLDER). The camera parameters should be put under a *.txt* file with 6 values (fx, fy, cx, cy, image_width, image_height) separately by a space. If the camera intrinsics is the same for all images, please put these parameters in *camera.txt*. Otherwise, please add a separate intrinsics file for each image, and name it the same with the image (changing the file extension to *.txt*). And then run:
+
+install IP Webcam app in your mobile,start server and give the ip address at 698th line 
+
 ```bash
-python evaluate.py --methods=f --suffix=warping_refine --dataset=inference --customDataFolder=$YOUR_IMAGE_FOLDER
+python evaluate_realtime.py --methods=f --suffix=warping_refine --dataset=inference 
 ```
 
-## Training
+## Training - verified and training
+
 ### Training data preparation
 Please first download the ScanNet dataset (v2), unzip it to "$ROOT_FOLDER/scans/", and extract image frames from the *.sens* file using the official [reader](https://github.com/ScanNet/ScanNet/blob/master/SensReader/python/reader.py).
 
@@ -105,12 +104,20 @@ To generate such training data on your own, please refer to *data_prep/parse.py*
 
 Besides scene-specific annotation under each scene folder, please download global metadata from [here](https://www.dropbox.com/s/v7qb7hwas1j766r/metadata.zip?dl=0), and unzip it to "$ROOT_FOLDER". Metadata includes the normal anchors (anchor_planes_N.npy) and invalid image indices caused by tracking issues (invalid_indices_*.txt). 
 
-### Training with custom data
+Backup gdrive link - plane annotations - scannet_5_scenes.zip - [here](https://drive.google.com/drive/folders/1b4yVyLvxknQ8e4yj5Jrw4r3Py9kj8hjf?usp=sharing)
+                     Global metadatas - metadata.zip - [here](https://drive.google.com/drive/folders/1EBDY0defytfDcqQvinufjTSe3I5rS7sT?usp=sharing)
+
+### Training with custom data using scanent template of dataloader(pending)
+
+Please refer the tree.md file and prepare dataset 
+
+
 To train on custom data, you need a list of planes, where each plane is represented using three parameters (as explained above) and a 2D binary mask. In our implementation, we use one 2D segmentation map where pixels with value *i* belong to the *i*th plane in the list. The easiest way is to replace the ScanNetScene class with something interacts with your custom data. Note that, the plane_info, which stores some semantic information and global plane index in the scene, is not used in this project. The code is misleading as global plane indices are read from plane_info [here](https://github.com/NVlabs/planercnn/blob/01e03fe5a97b7afc4c5c4c3090ddc9da41c071bd/datasets/plane_stereo_dataset.py#L194), but they are used only for debugging purposes.
 
-### Training script
+### Training script -verified
+
 ```bash
-python train_planercnn.py --restore=2 --suffix=warping_refine
+python train_planercnn.py --restore=1 --suffix=warping_refine
 ```
 options:
 ```bash
@@ -134,7 +141,8 @@ options:
 
 Temporary results are written under *test/* for debugging purposes.
 
-## Evaluation
+## Evaluation - verified
+
 To evaluate the performance against existing methods, please run:
 ```bash
 python evaluate.py --methods=f --suffix=warping_refine
@@ -147,21 +155,23 @@ Options:
 - e: evaluate PlaneRecover
 - t: evaluate MWS (--suffix=gt for MWS-G)
 ```
-Statistics are printed in terminal and saved in *logs/global.txt* for later analysis.
 
-Note that [PlaneNet](https://github.com/art-programmer/PlaneNet/blob/master/LICENSE) and [PlaneRecover](https://github.com/fuy34/planerecover/blob/master/LICENSE) are under the MIT license.
+### Todo:
 
-To evaluate on the NYU Depth dataset, please first download the labeled dataset from the official [website](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html), and the official train/test split from [here](http://horatio.cs.nyu.edu/mit/silberman/indoor_seg_sup/splits.mat). Put them under the same folder "$NYU_FOLDER". To evaluate, please run,
-```bash
-python evaluate.py --methods=f --suffix=warping_refine --dataset=nyu --dataFolder="$NYU_FOLDER"
-```
+1. Change dataloader for custom dataset 
+2. Make it work for custom dataset training from scratch or fine tuning
 
-Note that the numbers are off with the provided model. We retrained the model after cleaning up the code, which is different from the model we tested for the publication.
+
+
+### License ###
+Copyright (c) 2018 NVIDIA Corp.  All Rights Reserved.
+This work is licensed under the [Creative Commons Attribution NonCommercial ShareAlike 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
+
 
 ## Contact
-If you have any questions, please contact the primary author [Chen Liu &lt;chenliu@wustl.edu>](mailto:chenliu@wustl.edu), or [Kihwan Kim &lt;kihwank@nvidia.com>](mailto:kihwank@nvidia.com).
+If you have any questions, please contact Ajith (mailto:inocajith21.5@gmail.com)
 
 ## Acknowledgement
-Our implementation uses the nms/roialign from the Mask R-CNN implementation from [pytorch-mask-rcnn](https://github.com/multimodallearning/pytorch-mask-rcnn), which is licensed under [MIT License](https://github.com/multimodallearning/pytorch-mask-rcnn/blob/master/LICENSE)
-
+1. The nms/roialign from the Mask R-CNN implementation from [pytorch-mask-rcnn](https://github.com/multimodallearning/pytorch-mask-rcnn), which is licensed under [MIT License](https://github.com/multimodallearning/pytorch-mask-rcnn/blob/master/LICENSE)
+2. The School of AI(https://theschoolof.ai/) and EVA5 students
 
