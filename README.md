@@ -117,7 +117,7 @@ To train on custom data, you need a list of planes, where each plane is represen
 ### Training script -verified
 
 ```bash
-python train_planercnn.py --restore=1 --suffix=warping_refine
+python train_planercnn.py --restore=1 --suffix=warping_refine --dataFolder=data_prep/Data/
 ```
 options:
 ```bash
@@ -172,6 +172,7 @@ This work is licensed under the [Creative Commons Attribution NonCommercial Shar
 If you have any questions, please contact Ajith (mailto:inocajith21.5@gmail.com)
 
 ## Acknowledgement
+
 1. The nms/roialign from the Mask R-CNN implementation from [pytorch-mask-rcnn](https://github.com/multimodallearning/pytorch-mask-rcnn), which is licensed under [MIT License](https://github.com/multimodallearning/pytorch-mask-rcnn/blob/master/LICENSE)
 2. The School of AI(https://theschoolof.ai/) and EVA5 students
 
