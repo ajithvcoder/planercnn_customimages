@@ -107,14 +107,12 @@ Besides scene-specific annotation under each scene folder, please download globa
 Backup gdrive link - plane annotations - scannet_5_scenes.zip - [here](https://drive.google.com/drive/folders/1b4yVyLvxknQ8e4yj5Jrw4r3Py9kj8hjf?usp=sharing)
                      Global metadatas - metadata.zip - [here](https://drive.google.com/drive/folders/1EBDY0defytfDcqQvinufjTSe3I5rS7sT?usp=sharing)
 
-### Training with custom data using scanent template of dataloader(pending)
+### Setting up dataloader for training - will add soon
 
-Please refer the tree.md file and prepare dataset 
+please refer tree.md
 
 
-To train on custom data, you need a list of planes, where each plane is represented using three parameters (as explained above) and a 2D binary mask. In our implementation, we use one 2D segmentation map where pixels with value *i* belong to the *i*th plane in the list. The easiest way is to replace the ScanNetScene class with something interacts with your custom data. Note that, the plane_info, which stores some semantic information and global plane index in the scene, is not used in this project. The code is misleading as global plane indices are read from plane_info [here](https://github.com/NVlabs/planercnn/blob/01e03fe5a97b7afc4c5c4c3090ddc9da41c071bd/datasets/plane_stereo_dataset.py#L194), but they are used only for debugging purposes.
-
-### Training script -verified
+### Training script for scannet -verified
 
 ```bash
 python train_planercnn.py --restore=1 --suffix=warping_refine --dataFolder=data_prep/Data/
@@ -141,6 +139,27 @@ options:
 
 Temporary results are written under *test/* for debugging purposes.
 
+### Setting up Custom dataset(dataloader) for training - will add soon
+
+please refer tree_custom_data.md
+
+
+### Training with custom data using scanent template of dataloader(pending)
+
+Please refer the tree.md file and prepare dataset 
+
+
+To train on custom data, you need a list of planes, where each plane is represented using three parameters (as explained above) and a 2D binary mask. In our implementation, we use one 2D segmentation map where pixels with value *i* belong to the *i*th plane in the list. The easiest way is to replace the ScanNetScene class with something interacts with your custom data. Note that, the plane_info, which stores some semantic information and global plane index in the scene, is not used in this project. The code is misleading as global plane indices are read from plane_info [here](https://github.com/NVlabs/planercnn/blob/01e03fe5a97b7afc4c5c4c3090ddc9da41c071bd/datasets/plane_stereo_dataset.py#L194), but they are used only for debugging purposes.
+
+
+
+### Training script for custom dataset - working
+
+```bash
+python train_planercnn_custom.py --restore=1 --suffix=warping_refine --dataFolder=data_prep/Data/
+``` 
+
+
 ## Evaluation - verified
 
 To evaluate the performance against existing methods, please run:
@@ -158,8 +177,8 @@ Options:
 
 ### Todo:
 
-1. Change dataloader for custom dataset 
-2. Make it work for custom dataset training from scratch or fine tuning
+1. Change dataloader for custom dataset - working - 27/11/2020
+2. Make it work for custom dataset training from scratch or fine tuning - working -29/11/2020 
 
 
 
