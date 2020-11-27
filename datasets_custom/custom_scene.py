@@ -109,7 +109,7 @@ class CustomScene():
             self.depthShift = 40000.00 
             # Alpha value is read
             depth = cv2.imread(depthPath, -1).astype(np.float32) / self.depthShift
-            print("depthvalue",depth)
+            #print("depthvalue",depth)
             #np.save("depthdepth)
         except:
             print('no depth image', depthPath, self.scenePath)
@@ -139,7 +139,7 @@ class CustomScene():
         segmentList = zip(segments.tolist(), counts.tolist())
         segmentList = [segment for segment in segmentList if segment[0] not in [-1, 167771]]
         segmentList = sorted(segmentList, key=lambda x:-x[1])
-        print("0002")
+        #print("0002")
         newPlanes = []
         newPlaneInfo = []
         newSegmentation = np.full(segmentation.shape, fill_value=-1, dtype=np.int32)
@@ -173,16 +173,16 @@ class CustomScene():
         # print("reached -ckpt1")
         if len(planes) > 0:
             planes = self.transformPlanes(extrinsics, planes)
-            print("reached -ckpt10")
+            #print("reached -ckpt10")
             #print("depth----",depth)
             segmentation, plane_depths = cleanSegmentation(image, planes, segmentation, depth, self.camera, planeAreaThreshold=self.options.planeAreaThreshold, planeWidthThreshold=self.options.planeWidthThreshold, confident_labels=self.confident_labels, return_plane_depths=True)
-            print("reached -ckpt12")
+            #print("reached -ckpt12")
             masks = (np.expand_dims(segmentation, -1) == np.arange(len(planes))).astype(np.float32)
             plane_depth = (plane_depths.transpose((1, 2, 0)) * masks).sum(2)
             plane_mask = masks.max(2)
             plane_mask *= (depth > 1e-4).astype(np.float32)            
             plane_area = plane_mask.sum()
-            print("reached -ckpt13")
+            #print("reached -ckpt13")
             depth_error = (np.abs(plane_depth - depth) * plane_mask).sum() / max(plane_area, 1)
             # if depth_error > 0.1:
             #     print('depth error', depth_error)
@@ -194,10 +194,10 @@ class CustomScene():
         if len(planes) == 0 or segmentation.max() < 0:
             print("plane length", len(planes))
             print("seg",segmentation.max() < 0)
-            print("reached -ckpt2")
+            #print("reached -ckpt2")
             exit(1)
             pass
-        print("reached -ckpt21555")
+        #print("reached -ckpt21555")
         info = [image, planes, segmentation, depth, self.camera, extrinsics]
         
         if self.load_semantics or self.load_boundary:
@@ -207,9 +207,9 @@ class CustomScene():
         else:
             info.append(0)
             pass
-        print("check #----------------------------------------------------------")
+        #print("check #----------------------------------------------------------")
         if self.load_boundary:
-            print("reached -ckpt3")
+            #print("reached -ckpt3")
             plane_points = []
             plane_instances = []
             for plane_index in range(len(planes)):            
@@ -236,7 +236,8 @@ class CustomScene():
             boundary_map = np.zeros(segmentation.shape)
             
             plane_boundary_masks = []
-            print("reached -ckpt5")
+            #print("reached -ckpt5")
+
             for plane_index in range(len(planes)):
                 mask = (segmentation == plane_index).astype(np.uint8)
                 plane_boundary_masks.append(cv2.dilate(mask, np.ones((3, 3)), iterations=15) - cv2.erode(mask, np.ones((3, 3)), iterations=15) > 0.5)
@@ -274,10 +275,13 @@ class CustomScene():
                         boundary_map[boundary_mask] = 2
                     continue
                 continue
-            print("reached -ckpt5")
+            #print("reached -ckpt5")
             info[-1] = boundary_map
             pass
-        print(len(info))
-        if True:
-            exit()
+        #print(len(info))
+        # if True:
+        #     exit()
         return info
+
+
+## write unit test

@@ -59,6 +59,8 @@ class PlaneDatasetSingle(Dataset):
         
         # Taking class of CustomScene from custom_scene
         scene = CustomScene(options, scenePath, scene_id, self.confident_labels, self.layout_labels, load_semantics=load_semantics, load_boundary=load_boundary)
+        #print("reached #10132483")
+
         self.scenes.append(scene)
         print("scenes--", self.scenes)
         self.sceneImageIndices += [[len(self.scenes) - 1, imageIndex] for imageIndex in range(len(scene.imagePaths))]
@@ -209,7 +211,7 @@ class PlaneDatasetSingle(Dataset):
         return newPlanes
     
     def __getitem__(self, index):
-        print("get 2")
+        #print("get 2")
         t = int(time.time() * 1000000)
         np.random.seed(((t & 0xff000000) >> 24) +
                        ((t & 0x00ff0000) >> 8) +
@@ -235,7 +237,7 @@ class PlaneDatasetSingle(Dataset):
 
             try:
                 image, planes, segmentation, depth, camera, extrinsics = scene[imageIndex]
-                print("reached 238--------------")
+                #print("reached 238--------------")
                 if len(planes) == 0:
                     index += 1                    
                     continue
@@ -380,7 +382,7 @@ class PlaneDatasetSingle(Dataset):
     
     def getAnchorPlanesNormalOffset(self, visualize=False):
         for k in [7, ]:
-            print('k', k)
+            #print('k', k)
             filename_N = self.dataFolder + '/anchor_planes_N_' + str(k) + '.npy'
             filename_d = self.dataFolder + '/anchor_planes_d.npy'
             if os.path.exists(filename_N) and os.path.exists(filename_d) and False:

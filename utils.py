@@ -629,37 +629,46 @@ def predictPlaneNet(image):
 
 
 ## Clean segmentation
-def cleanSegmentation(image, planes, plane_info, segmentation, depth, camera, planeAreaThreshold=200, planeWidthThreshold=10, depthDiffThreshold=0.1, validAreaThreshold=0.5, brightThreshold=20, confident_labels={}, return_plane_depths=False):
-
+def cleanSegmentation(image, planes,  segmentation, depth, camera, planeAreaThreshold=200, planeWidthThreshold=10, depthDiffThreshold=0.1, validAreaThreshold=0.5, brightThreshold=1000, confident_labels={}, return_plane_depths=False):
+    # print("segmentation")
+    # print(segmentation)
+    # print("reach11145")
     planeDepths = calcPlaneDepths(planes, segmentation.shape[1], segmentation.shape[0], camera).transpose((2, 0, 1))
-    
+    #print("reach111456")
     newSegmentation = np.full(segmentation.shape, fill_value=-1)
+    #print("reach111457")
     validMask = np.logical_and(np.linalg.norm(image, axis=-1) > brightThreshold, depth > 1e-4)
+    validMask = True 
+    #print("reach111458")
     depthDiffMask = np.logical_or(np.abs(planeDepths - depth) < depthDiffThreshold, depth < 1e-4)
-
+    #depthDiffMask = True 
+    #print("reach111459")
     for segmentIndex in np.unique(segmentation):
         if segmentIndex < 0:
+            #print("segmentIndext",segmentIndex)
             continue
         segmentMask = segmentation == segmentIndex
 
-        try:
-            plane_info[segmentIndex][0][1]
-        except:
-            print('invalid plane info')
-            print(plane_info)
-            print(len(plane_info), len(planes), segmentation.min(), segmentation.max())
-            print(segmentIndex)
-            print(plane_info[segmentIndex])
-            exit(1)
-        if plane_info[segmentIndex][0][1] in confident_labels:
+        # try:
+        #     plane_info[segmentIndex][0][1]
+        # except:
+        #     print('invalid plane info')
+        #     print(plane_info)
+        #     print(len(plane_info), len(planes), segmentation.min(), segmentation.max())
+        #     print(segmentIndex)
+        #     print(plane_info[segmentIndex])
+        #     exit(1)
+        if confident_labels:
             if segmentMask.sum() > planeAreaThreshold:
-                newSegmentation[segmentMask] = segmentIndex
+                newSegmentation[segmentMask] = segmentIndex 
+                #print("reach45")
                 pass
             continue
         oriArea = segmentMask.sum()
         segmentMask = np.logical_and(segmentMask, depthDiffMask[segmentIndex])
         newArea = np.logical_and(segmentMask, validMask).sum()
         if newArea < oriArea * validAreaThreshold:
+            #print("reach46")
             continue
         segmentMask = segmentMask.astype(np.uint8)
         segmentMask = cv2.dilate(segmentMask, np.ones((3, 3)))
@@ -669,13 +678,16 @@ def cleanSegmentation(image, planes, plane_info, segmentation, depth, camera, pl
             ys, xs = mask.nonzero()
             area = float(len(xs))
             if area < planeAreaThreshold:
+                #print("reach47")
                 continue
             size_y = ys.max() - ys.min() + 1
             size_x = xs.max() - xs.min() + 1
             length = np.linalg.norm([size_x, size_y])
             if area / length < planeWidthThreshold:
+                #print("reach48")
                 continue
             newSegmentation[mask] = segmentIndex
+            #print("reach49")
             continue
         continue
     if return_plane_depths:

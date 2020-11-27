@@ -212,6 +212,8 @@ class Config(object):
     def loadAnchorPlanes(self, anchor_type = ''):
         ## Load cluster centers to serve as the anchors
         self.ANCHOR_TYPE = anchor_type
+        self.ANCHOR_TYPE ='none'
+        print("achor type----",anchor_type)
         with torch.no_grad():
             if self.ANCHOR_TYPE == 'none':
                 self.NUM_CLASSES = 2

@@ -27,7 +27,7 @@ class PlaneDataset(PlaneDatasetSingle):
         self.load_semantics = load_semantics
         self.load_boundary = load_boundary
         self.write_invalid_indices = write_invalid_indices
-        print("load sematics, load boundary")
+        #print("load sematics, load boundary")
         #print(load_semantics,load_boundary,write_invalid_indices)
         return
 
@@ -46,7 +46,7 @@ class PlaneDataset(PlaneDatasetSingle):
             if self.options.testingIndex >= 0 and index != self.options.testingIndex:
                 return 0
             pass
-        
+        #print("x0490803-id")
 
         sceneIndex, imageIndex = self.sceneImageIndices[index]
         scene = self.scenes[sceneIndex]
@@ -60,41 +60,37 @@ class PlaneDataset(PlaneDatasetSingle):
         
             sceneIndex, imageIndex = self.sceneImageIndices[index]
             scene = self.scenes[sceneIndex]
-            
+            #print("x5498498934")
             if imageIndex + self.options.frameGap < len(scene.imagePaths):
                 imageIndex_2 = imageIndex + self.options.frameGap
             else:
                 imageIndex_2 = imageIndex - self.options.frameGap
                 pass
-
-            # if (sceneIndex * 10000 + imageIndex_2) in self.invalid_indices:
-            #     continue
             
-            try:
-                image_1, planes_1, plane_info_1, segmentation_1, depth_1, camera_1, extrinsics_1, semantics_1 = scene[imageIndex]                
-            except:                
-                if self.write_invalid_indices:
-                    print('invalid')
-                    print(str(index) + ' ' + str(sceneIndex) + ' ' + str(imageIndex) + '\n', file=open(self.dataFolder + '/invalid_indices_' + self.split + '.txt', 'a'))
-                    return 1
-                continue
+            
+            image_1, planes_1, segmentation_1, depth_1, camera_1, extrinsics_1, semantics_1 = scene[imageIndex]                
+            
+            
 
             if self.write_invalid_indices:
                 return 0
-            
-            info_1 = [image_1, planes_1, plane_info_1, segmentation_1, depth_1, camera_1, extrinsics_1, semantics_1]
+            #print("x99498948")
+            info_1 = [image_1, planes_1,  segmentation_1, depth_1, camera_1, extrinsics_1, semantics_1]
             
             try:
-                image_2, planes_2, plane_info_2, segmentation_2, depth_2, camera_2, extrinsics_2, semantics_2 = scene[imageIndex_2]
+                image_2, planes_2, segmentation_2, depth_2, camera_2, extrinsics_2, semantics_2 = scene[imageIndex_2]
             except:
+                #print("x2343244879494")
                 continue
             
-            info_2 = [image_2, planes_2, plane_info_2, segmentation_2, depth_2, camera_2, extrinsics_2, semantics_2]
+            info_2 = [image_2, planes_2,  segmentation_2, depth_2, camera_2, extrinsics_2, semantics_2]
+            #print("x425644879494")
             break
         if self.image_only:
             data_pair = []
+            #print("x499894")
             for info in [info_1, info_2]:
-                image, planes, plane_info, segmentation, depth, camera, extrinsics, semantics = info
+                image, planes,  segmentation, depth, camera, extrinsics, semantics = info
                 image = cv2.resize(image, (depth.shape[1], depth.shape[0]))
                 image, window, scale, padding = utils.resize_image(
                     image,
@@ -110,8 +106,9 @@ class PlaneDataset(PlaneDatasetSingle):
             return data_pair
         data_pair = []
         extrinsics_pair = []
+        #print("x5499934")
         for info in [info_1, info_2]:
-            image, planes, plane_info, segmentation, depth, camera, extrinsics, semantics = info
+            image, planes,  segmentation, depth, camera, extrinsics, semantics = info
 
             image = cv2.resize(image, (depth.shape[1], depth.shape[0]))
             
@@ -146,31 +143,34 @@ class PlaneDataset(PlaneDatasetSingle):
                 if self.config.ANCHOR_TYPE == 'none':
                     class_ids.append(1)
                     parameters.append(np.concatenate([plane, np.zeros(1)], axis=0))
-                elif 'joint' in self.config.ANCHOR_TYPE:
-                    class_ids.append(plane_anchors[planeIndex] + 1)
-                    residual = plane - self.config.ANCHOR_PLANES[plane_anchors[planeIndex]]
-                    parameters.append(np.concatenate([residual, np.array([0, plane_info[planeIndex][-1]])], axis=0))
-                elif self.config.ANCHOR_TYPE == 'Nd':
+                # elif 'joint' in self.config.ANCHOR_TYPE:
+                #     class_ids.append(plane_anchors[planeIndex] + 1)
+                #     residual = plane - self.config.ANCHOR_PLANES[plane_anchors[planeIndex]]
+                #     #parameters.append(np.concatenate([residual, np.array([0, plane_info[planeIndex][-1]])], axis=0))
+                #     normal = plane_normals[planeIndex] - self.config.ANCHOR_NORMALS[normal_anchors[planeIndex]]
+                #     parameters.append(np.concatenate([normal, np.array([offset])], axis=0))
+                elif self.config.ANCHOR_TYPE == 'Nd' or 'normal' in self.config.ANCHOR_TYPE or 'joint' in self.config.ANCHOR_TYPE:
                     class_ids.append(normal_anchors[planeIndex] * len(self.config.ANCHOR_OFFSETS) + offset_anchors[planeIndex] + 1)
                     normal = plane_normals[planeIndex] - self.config.ANCHOR_NORMALS[normal_anchors[planeIndex]]
                     offset = plane_offsets[planeIndex] - self.config.ANCHOR_OFFSETS[offset_anchors[planeIndex]]
                     parameters.append(np.concatenate([normal, np.array([offset])], axis=0))
-                elif 'normal' in self.config.ANCHOR_TYPE:
-                    class_ids.append(normal_anchors[planeIndex] + 1)
-                    normal = plane_normals[planeIndex] - self.config.ANCHOR_NORMALS[normal_anchors[planeIndex]]
-                    parameters.append(np.concatenate([normal, np.array([plane_info[planeIndex][-1]])], axis=0))
+                # elif 'normal' in self.config.ANCHOR_TYPE:
+                #     class_ids.append(normal_anchors[planeIndex] + 1)
+                #     normal = plane_normals[planeIndex] - self.config.ANCHOR_NORMALS[normal_anchors[planeIndex]]
+                #     parameters.append(np.concatenate([normal, np.array([offset])], axis=0))
+                    #parameters.append(np.concatenate([normal, np.array([plane_info[planeIndex][-1]])], axis=0))
                 else:
                     assert(False)
                     pass
                 continue
-
+            #print("x94838920")
             parameters = np.array(parameters)
             mask = np.stack(instance_masks, axis=2)
             class_ids = np.array(class_ids, dtype=np.int32)
 
                         
             image, image_metas, gt_class_ids, gt_boxes, gt_masks, gt_parameters = load_image_gt(self.config, index, image, depth, mask, class_ids, parameters, augment=self.split == 'train')
-            
+            #print("39994934")
             ## RPN Targets
             rpn_match, rpn_bbox = build_rpn_targets(image.shape, self.anchors,
                                                     gt_class_ids, gt_boxes, self.config)
@@ -191,7 +191,7 @@ class PlaneDataset(PlaneDatasetSingle):
 
             depth = np.concatenate([np.zeros((80, 640)), depth, np.zeros((80, 640))], axis=0)
             segmentation = np.concatenate([np.full((80, 640), fill_value=-1, dtype=np.int32), segmentation, np.full((80, 640), fill_value=-1, dtype=np.int32)], axis=0)
-
+            #print("39948")
             ## Convert
             image = torch.from_numpy(image.transpose(2, 0, 1)).float()
             image_metas = torch.from_numpy(image_metas)
@@ -220,17 +220,18 @@ class PlaneDataset(PlaneDatasetSingle):
         data_pair.append(np.concatenate([translation, axis, np.array([angle])], axis=0).astype(np.float32))
 
         correspondence = np.zeros((len(info_1[1]), len(info_2[1])), dtype=np.float32)
-        for planeIndex_1, plane_info_1 in enumerate(info_1[2]):
-            for planeIndex_2, plane_info_2 in enumerate(info_2[2]):
-                if plane_info_1[-1] == plane_info_2[-1]:
-                    correspondence[planeIndex_1][planeIndex_2] = 1
-                    pass
-                continue
-            continue
+        # for planeIndex_1, plane_info_1 in enumerate(info_1[2]):
+        #     for planeIndex_2, plane_info_2 in enumerate(info_2[2]):
+        #         if plane_info_1[-1] == plane_info_2[-1]:
+        #             correspondence[planeIndex_1][planeIndex_2] = 1
+        #             pass
+        #         continue
+        #     continue
         data_pair.append(info_1[1].astype(np.float32))
         data_pair.append(info_2[1].astype(np.float32))        
         data_pair.append(correspondence)
         data_pair.append(camera.astype(np.float32))
+        #print("data pair",len(data_pair))
 
         return data_pair
 

@@ -62,7 +62,7 @@ def train(options):
         print("Loading pretrained weights ", model_path)
         model.load_weights(model_path)
         pass
-    
+    print("x94028920")
     if options.trainingMode != '':
         ## Specify which layers to train, default is "all"
         layer_regex = {
@@ -88,6 +88,7 @@ def train(options):
     for name, param in refine_model.named_parameters():
         assert(name not in model_names)
         continue
+    
     optimizer = optim.SGD([
         {'params': trainables_wo_bn, 'weight_decay': 0.0001},
         {'params': trainables_only_bn},
@@ -101,15 +102,17 @@ def train(options):
     if options.restore == 1 and os.path.exists(options.checkpoint_dir + '/optim.pth'):
         optimizer.load_state_dict(torch.load(options.checkpoint_dir + '/optim.pth'))        
         pass
-
+     
     print("104")
     for epoch in range(options.numEpochs):
+        print("epcoh reached")
         epoch_losses = []
         data_iterator = tqdm(dataloader, total=len(dataset) + 1)
 
         optimizer.zero_grad()
         print("110")
         for sampleIndex, sample in enumerate(data_iterator):
+            print(sample)
             print("002")
             losses = []            
 

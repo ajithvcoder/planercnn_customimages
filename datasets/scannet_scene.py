@@ -84,6 +84,7 @@ class ScanNetScene():
         self.camera[4] = self.depthWidth
         self.camera[5] = self.depthHeight
         self.planes = np.load(scenePath + '/annotation/planes.npy')
+        print(self.planes)
 
         self.plane_info = np.load(scenePath + '/annotation/plane_info.npy')            
         if len(self.plane_info) != len(self.planes):
@@ -132,7 +133,11 @@ class ScanNetScene():
             pass
 
         try:
+            #print("depthshit value",self.depthShift)
+            self.depthShift = 40000.00 
             depth = cv2.imread(depthPath, -1).astype(np.float32) / self.depthShift
+            print("depthvalue",depth)
+            #np.save("depthdepth)
         except:
             print('no depth image', depthPath, self.scenePath)
             exit(1)
@@ -150,7 +155,7 @@ class ScanNetScene():
         extrinsics[1] = extrinsics[2]
         extrinsics[2] = -temp
 
-        
+        print("0001")
         segmentation = cv2.imread(segmentationPath, -1).astype(np.int32)
         
         segmentation = (segmentation[:, :, 2] * 256 * 256 + segmentation[:, :, 1] * 256 + segmentation[:, :, 0]) // 100 - 1
@@ -159,10 +164,13 @@ class ScanNetScene():
         segmentList = zip(segments.tolist(), counts.tolist())
         segmentList = [segment for segment in segmentList if segment[0] not in [-1, 167771]]
         segmentList = sorted(segmentList, key=lambda x:-x[1])
-        
+        print("0002")
         newPlanes = []
         newPlaneInfo = []
         newSegmentation = np.full(segmentation.shape, fill_value=-1, dtype=np.int32)
+        # print("segment list shape",segmentList)
+        # if True:
+        #     exit()
 
         newIndex = 0
         for oriIndex, count in segmentList:
@@ -172,7 +180,10 @@ class ScanNetScene():
                 continue            
             if np.linalg.norm(self.planes[oriIndex]) < 1e-4:
                 continue
+            # print("stuck here ",count," ",oriIndex)
+            # print(self.planes[oriIndex])
             newPlanes.append(self.planes[oriIndex])
+            #print(len(newPlanes))
             newSegmentation[segmentation == oriIndex] = newIndex
             newPlaneInfo.append(self.plane_info[oriIndex] + [oriIndex])
             newIndex += 1
@@ -183,30 +194,37 @@ class ScanNetScene():
         plane_info = newPlaneInfo        
 
         image = cv2.resize(image, (depth.shape[1], depth.shape[0]))
-
+        # print("length of 1st plane",len(planes))
+        # print("reached -ckpt1")
         if len(planes) > 0:
             planes = self.transformPlanes(extrinsics, planes)
+            print("reached -ckpt10")
+            #print("depth----",depth)
             segmentation, plane_depths = cleanSegmentation(image, planes, plane_info, segmentation, depth, self.camera, planeAreaThreshold=self.options.planeAreaThreshold, planeWidthThreshold=self.options.planeWidthThreshold, confident_labels=self.confident_labels, return_plane_depths=True)
-
+            print("reached -ckpt12")
             masks = (np.expand_dims(segmentation, -1) == np.arange(len(planes))).astype(np.float32)
             plane_depth = (plane_depths.transpose((1, 2, 0)) * masks).sum(2)
             plane_mask = masks.max(2)
             plane_mask *= (depth > 1e-4).astype(np.float32)            
             plane_area = plane_mask.sum()
+            print("reached -ckpt13")
             depth_error = (np.abs(plane_depth - depth) * plane_mask).sum() / max(plane_area, 1)
-            if depth_error > 0.1:
-                print('depth error', depth_error)
-                planes = []
-                pass
+            # if depth_error > 0.1:
+            #     print('depth error', depth_error)
+            #     planes = []
+            #     pass
 
             pass
         
         if len(planes) == 0 or segmentation.max() < 0:
+            print("plane length", len(planes))
+            print("seg",segmentation.max() < 0)
+            print("reached -ckpt2")
             exit(1)
             pass
-        
+        print("reached -ckpt21555")
         info = [image, planes, plane_info, segmentation, depth, self.camera, extrinsics]
-
+        
         if self.load_semantics or self.load_boundary:
             semantics = cv2.imread(semanticsPath, -1).astype(np.int32)
             semantics = cv2.resize(semantics, (640, 480), interpolation=cv2.INTER_NEAREST)
@@ -216,6 +234,7 @@ class ScanNetScene():
             pass
 
         if self.load_boundary:
+            print("reached -ckpt3")
             plane_points = []
             plane_instances = []
             for plane_index in range(len(planes)):            
@@ -242,6 +261,7 @@ class ScanNetScene():
             boundary_map = np.zeros(segmentation.shape)
             
             plane_boundary_masks = []
+            print("reached -ckpt5")
             for plane_index in range(len(planes)):
                 mask = (segmentation == plane_index).astype(np.uint8)
                 plane_boundary_masks.append(cv2.dilate(mask, np.ones((3, 3)), iterations=15) - cv2.erode(mask, np.ones((3, 3)), iterations=15) > 0.5)
@@ -279,7 +299,7 @@ class ScanNetScene():
                         boundary_map[boundary_mask] = 2
                     continue
                 continue
-            
+            print("reached -ckpt5")
             info[-1] = boundary_map
             pass
                 
