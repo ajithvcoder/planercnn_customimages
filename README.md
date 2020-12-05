@@ -31,36 +31,6 @@ python -m virtualenv planercnn
 source planercnn/bin/activate
 pip install -r requirements.txt
 ```
-Now, we compile nms and roialign as explained in the installation section of [pytorch-mask-rcnn](https://github.com/multimodallearning/pytorch-mask-rcnn). To be specific, you can build these two functions using the following commands with the right `--arch` option:
-
- | GPU                     | arch  |
- |-------------------------|-------|
- | TitanX                  | sm_52 |
- | GTX 960M                | sm_50 |
- | GTX 1070                | sm_61 |
- | GTX 1080 (Ti), Titan XP | sm_61 |
- | P100                    | sm_60 | 
-
- For gene code you can refer this [link](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
-
-More details of the compute capability are shown in [NVIDIA](https://developer.nvidia.com/cuda-gpus)
-
-
-```bash
-cd nms/src/cuda/
-nvcc -c -o nms_kernel.cu.o nms_kernel.cu -x cu -Xcompiler -fPIC -arch=[arch]
-cd ../../
-python build.py
-cd ../
-
-
-cd roialign/roi_align/src/cuda/
-nvcc -c -o crop_and_resize_kernel.cu.o crop_and_resize_kernel.cu -x cu -Xcompiler -fPIC -arch=[arch]
-cd ../../
-python build.py
-cd ../../
-
-```
 
 Note: If you are doing in colab then go with cuda8.0 , torch 0.4.0 , gcc 5+ for building and upgrade to torch 0.4.1 for evaluate/training.
 
@@ -151,9 +121,14 @@ Please refer the tree.md file and prepare dataset
 
 To train on custom data, you need a list of planes, where each plane is represented using three parameters (as explained above) and a 2D binary mask. In our implementation, we use one 2D segmentation map where pixels with value *i* belong to the *i*th plane in the list. The easiest way is to replace the ScanNetScene class with something interacts with your custom data. Note that, the plane_info, which stores some semantic information and global plane index in the scene, is not used in this project. The code is misleading as global plane indices are read from plane_info [here](https://github.com/NVlabs/planercnn/blob/01e03fe5a97b7afc4c5c4c3090ddc9da41c071bd/datasets/plane_stereo_dataset.py#L194), but they are used only for debugging purposes.
 
+### Status note
+
+1. pending - still i didnt work on that part
+2. Working - I am working on that part
+3. Completed/Verified - its completely working and verified
 
 
-### Training script for custom dataset - working
+### Training script for custom dataset - Ajith is working in it not verified
 
 ```bash
 python train_planercnn_custom.py --restore=1 --suffix=warping_refine --dataFolder=data_prep/Data/
@@ -174,12 +149,35 @@ Options:
 - e: evaluate PlaneRecover
 - t: evaluate MWS (--suffix=gt for MWS-G)
 ```
+### Observation
+
+A. Scannet Training from checkpoint(given in repo) for other scannet images - completed  
+    It was observered that we need to set the depth error to 0.3 (within limits) so that further training takes place without loss and there will be no "nan" and breaking of training.
+    Was able to train for 17 epcohs from pretrained checkpoint
+    Was able to inference the images after training
+
+B. Scannet Training from scratch - (working)
+    It was observered that while training from scratch and depth error should be within 0.3 to keep the losses minimum, how ever during wrong initalization some times while training from scratch i have observered heavy losses. But mosty if depth error is controlled it will train without failing. However i trained only for certain epochs(4 or 5) so was not able to inference the images beacuase it was not generating planeXYZ for few epochs.
+    (One of the reason is dataset of scannet is large and downloading it and structuring even for 5 files will take more time. Also because of depth error in some images its skipping those images)
+
+C. Proper method of annotating and construct custom dataset - (working)
+    it was observered that plane info,segmentation,depth images is a important while training . So need to find methods to properly annotate and construct the info in accordance with the parameters in
+    planercnn
+
+C. Custom images Training from checkpoint - (pending)
+
+D. Custom images Training from Scratch - (working)
+
+
+
 
 ### Todo:
 
-1. Change dataloader for custom dataset - working - 27/11/2020
-2. Make it work for custom dataset training from scratch or fine tuning - working -29/11/2020 
+1. Change dataloader for custom dataset - completed - 27/11/2020  - working for from scratch training.
+2. Giving high loss as i have removed plane_info and anchors, need to replace properly and reduce the loss - 29/11/2020
+3. Need to fetch seperate planes for each image - 28/11/2020
 
+### Neighbour repos:
 
 
 ### License ###
