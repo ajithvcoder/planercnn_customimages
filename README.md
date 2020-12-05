@@ -156,16 +156,22 @@ A. Scannet Training from checkpoint(given in repo) for other scannet images - co
     Was able to train for 17 epcohs from pretrained checkpoint
     Was able to inference the images after training
 
+    Getting annotations from parse.py: -verified/completed
+        1. Go to [planenet](https://github.com/art-programmer/PlaneNet) set a conda env with python2.7 tensorflow==1.13.0 , opencv
+            - do everything in data_preparation/readme.md( install Openmesh from here https://github.com/TheWebMonks/meshmonk/blob/master/docs/ubuntu.md#installing-openmesh if you need)
+            - while running parse.py change 696th line to this cmd = './Renderer/Renderer --scene_id=' + scene_id + ' --root_folder=' + ROOT_FOLDER 
+            - now you can get segmentation, plane_info.npy, planes.npy
+
 B. Scannet Training from scratch - (working)
     It was observered that while training from scratch and depth error should be within 0.3 to keep the losses minimum, how ever during wrong initalization some times while training from scratch i have observered heavy losses. But mosty if depth error is controlled it will train without failing. However i trained only for certain epochs(4 or 5) so was not able to inference the images beacuase it was not generating planeXYZ for few epochs.
     (One of the reason is dataset of scannet is large and downloading it and structuring even for 5 files will take more time. Also because of depth error in some images its skipping those images)
-
-    Getting annotations from parse.py: -verified/completed
-        1. Go to planenet and do cmake - install Openmesh from here https://github.com/TheWebMonks/meshmonk/blob/master/docs/ubuntu.md#installing-openmesh 
+  
 
 C. Proper method of annotating and constructing custom dataset - (working)
     it was observered that plane info,segmentation,depth images is a important while training . So need to find methods to properly annotate and construct the info in accordance with the parameters in
     planercnn
+
+    - method to genrate clean depth images similar to scannet or redwoods dataset - (pending)
 
 D. Custom images Training from checkpoint - (pending)
 
@@ -173,21 +179,20 @@ E. Custom images Training from Scratch - (working)
 
 ### Info about point cloud:
 
-    1. https://github.com/jeffdelmerico/pointcloud_tutorial
+1. https://github.com/jeffdelmerico/pointcloud_tutorial
 
-    2. Converting rgbd to point cloud - install open3d - http://www.open3d.org/docs/latest/tutorial/Basic/rgbd_image.html - its really a beutifull one, 2d will be converted to 3d Wow!
+2. Converting rgbd to point cloud - install open3d - http://www.open3d.org/docs/latest/tutorial/Basic/rgbd_image.html - its really a beutifull one, 2d will be converted to 3d Wow!
         dataset - http://redwood-data.org/indoor/dataset.html 
-    3. 
+ 
 
 
 
 ### Todo:
 
-1. Change dataloader for custom dataset - completed - 27/11/2020  - working for from scratch training.
+1. Change dataloader for custom dataset - not completed - 27/11/2020  - working for from scratch training.
 2. Giving high loss as i have removed plane_info and anchors, need to replace properly and reduce the loss - 29/11/2020
 3. Need to fetch seperate planes for each image - 28/11/2020
 
-fix parse.py planercnn
 
 
 
