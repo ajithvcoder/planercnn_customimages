@@ -156,7 +156,7 @@ A. Scannet Training from checkpoint(given in repo) for other scannet images - co
     Was able to train for 17 epcohs from pretrained checkpoint
     Was able to inference the images after training
 
-    Getting annotations from parse.py: -verified/completed
+Getting annotations from parse.py: -verified/completed
         1. Go to [planenet](https://github.com/art-programmer/PlaneNet) set a conda env with python2.7 tensorflow==1.13.0 , opencv
             - do everything in data_preparation/readme.md( install Openmesh from here https://github.com/TheWebMonks/meshmonk/blob/master/docs/ubuntu.md#installing-openmesh if you need)
             - while running parse.py change 696th line to this cmd = './Renderer/Renderer --scene_id=' + scene_id + ' --root_folder=' + ROOT_FOLDER 
@@ -170,8 +170,13 @@ B. Scannet Training from scratch - (working)
 C. Proper method of annotating and constructing custom dataset - (working)
     it was observered that plane info,segmentation,depth images is a important while training . So need to find methods to properly annotate and construct the info in accordance with the parameters in
     planercnn
+    
+   method to genrate clean depth images similar to scannet or redwoods dataset - (pending)
 
-    - method to genrate clean depth images similar to scannet or redwoods dataset - (pending)
+   it seems that we need a stero camera to genrate such perfect point cloud depth map. so i have took from [redwood indoor reconstruction dataset](http://redwood-data.org/indoor/dataset.html)
+    Able to Genrate custom segmentations without point cloud with this reprository - https://github.com/chaowang15/RGBDPlaneDetection
+    plane info is given by the repo
+    
 
 D. Custom images Training from checkpoint - (pending)
 
